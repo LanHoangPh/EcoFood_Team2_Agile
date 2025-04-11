@@ -45,7 +45,7 @@
 
           <div>
             <button type="submit" class="w-full btn btn-primary" :disabled="isLoading">
-              {{ isLoading ? 'Creating account...' : 'Create account' }}
+              {{ isLoading ? 'Đang tạo tài khoản...' : 'Tạo tài khoản' }}
             </button>
           </div>
         </form>
@@ -95,7 +95,7 @@ const handleRegister = async () => {
       error.value = result.message;
     }
   } catch (err) {
-    error.value = 'An error occurred. Please try again.';
+    error.value = 'Đã xảy ra lỗi. Vui lòng thử lại.';
     console.error(err);
   } finally {
     isLoading.value = false;

@@ -32,7 +32,7 @@
 
           <div>
             <button type="submit" class="w-full btn btn-primary" :disabled="isLoading">
-              {{ isLoading ? 'Signing in...' : 'Sign in' }}
+              {{ isLoading ? 'Đang đăng nhập...' : 'Đăng nhập' }}
             </button>
           </div>
         </form>
@@ -71,7 +71,7 @@ const handleLogin = async () => {
       error.value = result.message;
     }
   } catch (err) {
-    error.value = 'An error occurred. Please try again.';
+    error.value = 'Đã xảy ra lỗi. Vui lòng thử lại.';
     console.error(err);
   } finally {
     isLoading.value = false;

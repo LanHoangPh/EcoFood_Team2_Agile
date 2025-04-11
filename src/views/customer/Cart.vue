@@ -3,7 +3,7 @@
     <h1 class="text-2xl font-bold mb-6">Giỏ hàng</h1>
 
     <div v-if="cartItems.length > 0">
-      <!-- Cart Items -->
+      <!-- vật phẩm trong giỏ -->
       <div class="bg-white rounded-lg shadow overflow-hidden mb-6">
         <table class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
@@ -38,7 +38,7 @@
                 </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">${{ item.price.toFixed(2) }}</div>
+                <div class="text-sm text-gray-900">₫{{ item.price.toFixed(2) }}</div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="flex items-center">
@@ -53,7 +53,7 @@
                 </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm font-medium text-gray-900">${{ (item.price * item.quantity).toFixed(2) }}</div>
+                <div class="text-sm font-medium text-gray-900">₫{{ (item.price * item.quantity).toFixed(2) }}</div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <button @click="removeItem(index)" class="text-red-600 hover:text-red-900">
@@ -65,7 +65,7 @@
         </table>
       </div>
 
-      <!-- Summary and Checkout -->
+      <!-- chi tiết hóa đơn -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div class="md:col-span-2">
           <div class="bg-white rounded-lg shadow p-6">
@@ -77,34 +77,34 @@
         </div>
         <div>
           <div class="bg-white rounded-lg shadow p-6">
-            <h2 class="text-lg font-medium mb-4">Order Summary</h2>
+            <h2 class="text-lg font-medium mb-4">Tóm tắt đơn hàng</h2>
             <div class="space-y-2">
               <div class="flex justify-between">
-                <span class="text-gray-600">Subtotal</span>
-                <span>${{ cartTotal.toFixed(2) }}</span>
+                <span class="text-gray-600">Tổng cộng</span>
+                <span>₫{{ cartTotal.toFixed(2) }}</span>
               </div>
               <div class="flex justify-between">
-                <span class="text-gray-600">Shipping</span>
-                <span>${{ shipping.toFixed(2) }}</span>
+                <span class="text-gray-600">Phí Ship</span>
+                <span>₫{{ shipping.toFixed(2) }}</span>
               </div>
               <div class="flex justify-between">
-                <span class="text-gray-600">Tax</span>
-                <span>${{ tax.toFixed(2) }}</span>
+                <span class="text-gray-600">Thuế</span>
+                <span>₫{{ tax.toFixed(2) }}</span>
               </div>
               <div class="border-t pt-2 mt-2">
                 <div class="flex justify-between font-bold">
-                  <span>Total</span>
-                  <span>${{ orderTotal.toFixed(2) }}</span>
+                  <span>Tổng tiền</span>
+                  <span>₫{{ orderTotal.toFixed(2) }}</span>
                 </div>
               </div>
             </div>
             <button @click="checkout" class="btn btn-primary w-full mt-4">
-              Proceed to Checkout
+              Tiến tới thanh toán
             </button>
             <div class="mt-4">
               <router-link to="/products" class="text-green-600 hover:text-green-700 flex items-center justify-center">
                 <ArrowLeftIcon class="h-4 w-4 mr-1" />
-                Continue Shopping
+                Tiếp tục mua sắm
               </router-link>
             </div>
           </div>
@@ -112,13 +112,13 @@
       </div>
     </div>
 
-    <!-- Empty cart -->
+    <!-- Giỏ hàng trống -->
     <div v-else class="bg-white rounded-lg shadow p-12 text-center">
       <ShoppingCartIcon class="h-16 w-16 text-gray-400 mx-auto mb-4" />
-      <h2 class="text-xl font-medium mb-2">Your cart is empty</h2>
-      <p class="text-gray-600 mb-6">Looks like you haven't added any products to your cart yet.</p>
+      <h2 class="text-xl font-medium mb-2">Giỏ hàng của bạn đang trống</h2>
+      <p class="text-gray-600 mb-6">Có vẻ như bạn chưa thêm sản phẩm nào vào giỏ hàng.</p>
       <router-link to="/products" class="btn btn-primary">
-        Start Shopping
+        Bắt đầu mua sắm
       </router-link>
     </div>
   </CustomerLayout>
@@ -133,12 +133,9 @@ import CustomerLayout from '../../components/customer/CustomerLayout.vue';
 const router = useRouter();
 const cartItems = ref([]);
 const instructions = ref('');
+const taxRate = 0.08; // 8% thuế
+const shipping = computed(() => cartTotal.value >= 1000000 ? 0 : 20000);
 
-// Shipping and tax calculations
-const taxRate = 0.08; // 8% tax
-const shipping = computed(() => cartTotal.value >= 50 ? 0 : 5.99);
-
-// Calculate totals
 const cartTotal = computed(() => {
   return cartItems.value.reduce((total, item) => total + (item.price * item.quantity), 0);
 });
@@ -174,14 +171,12 @@ const removeItem = (index) => {
 
 const saveCart = () => {
   localStorage.setItem('cart', JSON.stringify(cartItems.value));
-
-  // Trigger storage event for navbar to update cart count
   window.dispatchEvent(new Event('storage'));
 };
 
 const checkout = () => {
   if (cartItems.value.length === 0) {
-    alert('Your cart is empty!');
+    alert('Giỏ hàng của bạn đang trống!');
     return;
   }
 

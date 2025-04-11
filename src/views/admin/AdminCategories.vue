@@ -1,14 +1,12 @@
 <template>
   <AdminLayout>
     <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-bold">Categories</h1>
+      <h1 class="text-2xl font-bold">Danh mục đồ ăn</h1>
       <button @click="openCategoryModal()" class="btn btn-primary">
         <PlusIcon class="h-5 w-5 mr-1" />
-        Add Category
+        Thêm danh mục
       </button>
     </div>
-
-    <!-- Categories Grid -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       <div v-for="category in categories" :key="category.id"
         class="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow">
@@ -28,21 +26,17 @@
           </button>
         </div>
       </div>
-
-      <!-- Empty state -->
       <div v-if="categories.length === 0" class="col-span-full bg-white rounded-lg shadow p-12 text-center">
         <TagsIcon class="h-16 w-16 text-gray-400 mx-auto mb-4" />
-        <h3 class="text-lg font-medium text-gray-900">No categories found</h3>
+        <h3 class="text-lg font-medium text-gray-900">Không tìm thấy danh mục</h3>
         <p class="mt-1 text-gray-500 mb-6">
-          Get started by creating a new category
+          Bắt đầu viccj tạo mới danh mục
         </p>
         <button @click="openCategoryModal()" class="btn btn-primary">
-          Add Category
+          Thêm danh mục
         </button>
       </div>
     </div>
-
-    <!-- Category Modal -->
     <div v-if="showCategoryModal" class="fixed inset-0 z-10 overflow-y-auto">
       <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
         <div class="fixed inset-0 transition-opacity" @click="showCategoryModal = false">
@@ -62,14 +56,13 @@
                 <label for="name" class="form-label">Name</label>
                 <input id="name" type="text" v-model="editingCategory.name" class="form-input" required />
               </div>
-
               <div>
                 <label for="icon" class="form-label">Icon (Emoji)</label>
                 <input id="icon" type="text" v-model="editingCategory.icon" class="form-input" required />
               </div>
 
               <div class="mt-2">
-                <p class="text-sm text-gray-500 mb-2">Available Emoji Icons:</p>
+                <p class="text-sm text-gray-500 mb-2">Biểu tượng cảm xúc có sẵn:</p>
                 <div class="grid grid-cols-8 gap-2">
                   <button v-for="(emoji, index) in availableEmojis" :key="index" type="button"
                     @click="editingCategory.icon = emoji" class="text-2xl p-2 rounded hover:bg-gray-100">
@@ -118,16 +111,13 @@ const availableEmojis = [
 ];
 
 onMounted(() => {
-  // Load categories
   categories.value = JSON.parse(localStorage.getItem('categories')) || [];
 });
 
 const openCategoryModal = (category = null) => {
   if (category) {
-    // Edit existing category
     editingCategory.value = { ...category };
   } else {
-    // Add new category
     editingCategory.value = {
       id: null,
       name: '',
@@ -139,44 +129,37 @@ const openCategoryModal = (category = null) => {
 };
 
 const saveCategory = () => {
-  // Validate form
   if (!editingCategory.value.name || !editingCategory.value.icon) {
-    alert('Please fill out all required fields');
+    alert('Vui lòng điền vào tất cả các trường bắt buộc');
     return;
   }
 
   const allCategories = JSON.parse(localStorage.getItem('categories')) || [];
 
   if (editingCategory.value.id) {
-    // Update existing category
     const index = allCategories.findIndex(c => c.id === editingCategory.value.id);
     if (index !== -1) {
       allCategories[index] = { ...editingCategory.value };
     }
   } else {
-    // Add new category
     const newCategory = {
       ...editingCategory.value,
       id: generateId('categories')
     };
     allCategories.push(newCategory);
   }
-
-  // Save to localStorage and update local state
   localStorage.setItem('categories', JSON.stringify(allCategories));
   categories.value = allCategories;
 
-  // Close modal
   showCategoryModal.value = false;
 };
 
 const deleteCategory = (categoryId) => {
-  if (!confirm('Are you sure you want to delete this category? This will not delete associated products.')) return;
+  if (!confirm('Bạn có chắc chắn muốn xóa danh mục này không? Thao tác này sẽ không xóa các sản phẩm liên quan tới danh mục.')) return;
 
   const allCategories = JSON.parse(localStorage.getItem('categories')) || [];
-  const updatedCategories = allCategories.filter(c => c.id !== categoryId);
+  const updatedCategories = allCategories.filter(c => c.id !== categoryId)
 
-  // Save to localStorage and update local state
   localStorage.setItem('categories', JSON.stringify(updatedCategories));
   categories.value = updatedCategories;
 };

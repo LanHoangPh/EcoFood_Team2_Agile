@@ -128,7 +128,7 @@
         <div class="fixed inset-0 transition-opacity" @click="showProductModal = false">
           <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
         </div>
-        <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen"></span>
         <div
           class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
           <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
@@ -164,8 +164,13 @@
               </div>
 
               <div>
-                <label for="image" class="form-label">Image URL</label>
-                <input id="image" type="text" v-model="editingProduct.image" class="form-input" required />
+                <label for="image" class="form-label">Image</label>
+                <input id="image" type="file" @change="handleImageUpload" accept="image/*" class="form-input"
+                  :required="!editingProduct.id" />
+                <!-- Preview ảnh nếu cần -->
+                <div v-if="imagePreview" class="mt-2">
+                  <img :src="imagePreview" alt="Image Preview" class="h-24 w-24 object-cover rounded" />
+                </div>
               </div>
 
               <div>
@@ -198,6 +203,7 @@ import { generateId } from '../../utils/mockData';
 const products = ref([]);
 const categories = ref([]);
 const showProductModal = ref(false);
+const imagePreview = ref(null);
 
 const filters = ref({
   search: '',
@@ -210,15 +216,14 @@ const editingProduct = ref({
   name: '',
   description: '',
   price: 0,
-  image: '',
-  categoryId: 1,
+  image: null,
+  categoryId: null,
   rating: 0,
   reviews: [],
   stock: 0
 });
 
 onMounted(() => {
-  // Load products and categories
   products.value = JSON.parse(localStorage.getItem('products')) || [];
   categories.value = JSON.parse(localStorage.getItem('categories')) || [];
 });
@@ -229,10 +234,12 @@ const filteredProducts = computed(() => {
   // Apply search filter
   if (filters.value.search) {
     const searchTerm = filters.value.search.toLowerCase();
-    result = result.filter(p =>
-      p.name.toLowerCase().includes(searchTerm) ||
-      p.description.toLowerCase().includes(searchTerm)
-    );
+    result =
+
+      result.filter(p =>
+        p.name.toLowerCase().includes(searchTerm) ||
+        p.description.toLowerCase().includes(searchTerm)
+      );
   }
 
   // Apply category filter
@@ -268,6 +275,7 @@ const openProductModal = (product = null) => {
   if (product) {
     // Edit existing product
     editingProduct.value = { ...product };
+    imagePreview.value = product.image; // Hiển thị ảnh hiện tại
   } else {
     // Add new product
     editingProduct.value = {
@@ -275,48 +283,86 @@ const openProductModal = (product = null) => {
       name: '',
       description: '',
       price: 0,
-      image: 'https://source.unsplash.com/random/800x600/?food',
-      categoryId: categories.value.length > 0 ? categories.value[0].id : 1,
+      image: null,
+      categoryId: categories.value.length > 0 ? categories.value[0].id : null,
       rating: 0,
       reviews: [],
       stock: 0
     };
+    imagePreview.value = null; // Reset preview
   }
-
   showProductModal.value = true;
 };
 
+const handleImageUpload = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+    // Lưu file vào editingProduct
+    editingProduct.value.image = file;
+
+    // Tạo URL tạm thời để preview ảnh
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      imagePreview.value = e.target.result; // Lưu URL base64 để preview
+    };
+    reader.readAsDataURL(file);
+  }
+};
+
 const saveProduct = () => {
-  // Validate form
-  if (!editingProduct.value.name || !editingProduct.value.description ||
-    !editingProduct.value.image || editingProduct.value.price <= 0) {
-    alert('Please fill out all required fields');
+  // Kiểm tra các trường bắt buộc
+  if (!editingProduct.value.name ||
+    !editingProduct.value.description ||
+    !editingProduct.value.price ||
+    editingProduct.value.price <= 0 ||
+    !editingProduct.value.categoryId ||
+    (!editingProduct.value.id && !editingProduct.value.image)) {
+    alert('Please fill out all required fields, including an image for new products');
     return;
   }
 
   const allProducts = JSON.parse(localStorage.getItem('products')) || [];
 
+  // Xử lý ảnh: lưu base64
+  let imageToSave = editingProduct.value.image;
+  if (editingProduct.value.image instanceof File) {
+    // Nếu là file, chuyển thành base64
+    const reader = new FileReader();
+    reader.onload = () => {
+      imageToSave = reader.result; // Lưu base64
+      saveProductToStorage(imageToSave, allProducts);
+    };
+    reader.readAsDataURL(editingProduct.value.image);
+  } else {
+    // Nếu không phải file (ví dụ: đang edit và không thay ảnh)
+    saveProductToStorage(imageToSave, allProducts);
+  }
+};
+
+const saveProductToStorage = (imageToSave, allProducts) => {
   if (editingProduct.value.id) {
-    // Update existing product
+    // Cập nhật sản phẩm hiện có
     const index = allProducts.findIndex(p => p.id === editingProduct.value.id);
     if (index !== -1) {
-      allProducts[index] = { ...editingProduct.value };
+      allProducts[index] = { ...editingProduct.value, image: imageToSave };
     }
   } else {
-    // Add new product
+    // Thêm sản phẩm mới
     const newProduct = {
       ...editingProduct.value,
-      id: generateId('products')
+      id: generateId('products'),
+      image: imageToSave
     };
     allProducts.push(newProduct);
   }
-
-  // Save to localStorage and update local state
   localStorage.setItem('products', JSON.stringify(allProducts));
   products.value = allProducts;
-
-  // Close modal
   showProductModal.value = false;
+  imagePreview.value = null; // Reset preview sau khi lưu
 };
 
 const deleteProduct = (productId) => {
@@ -325,7 +371,6 @@ const deleteProduct = (productId) => {
   const allProducts = JSON.parse(localStorage.getItem('products')) || [];
   const updatedProducts = allProducts.filter(p => p.id !== productId);
 
-  // Save to localStorage and update local state
   localStorage.setItem('products', JSON.stringify(updatedProducts));
   products.value = updatedProducts;
 };

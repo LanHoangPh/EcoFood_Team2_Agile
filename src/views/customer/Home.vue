@@ -1,6 +1,5 @@
 <template>
   <CustomerLayout>
-    <!-- Hero Section -->
     <section class="relative">
       <div class="bg-green-700 h-80 rounded-xl overflow-hidden">
         <img :src="currentImage" alt="Fresh organic food" class="w-full h-full object-cover opacity-30" />
@@ -15,8 +14,6 @@
         </div>
       </div>
     </section>
-
-    <!-- Categories Section -->
     <section class="mt-12">
       <h2 class="text-2xl font-bold mb-6">Mua hàng theo danh mục</h2>
       <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -27,8 +24,6 @@
         </router-link>
       </div>
     </section>
-
-    <!-- Featured Products Section -->
     <section class="mt-12">
       <h2 class="text-2xl font-bold mb-6">Sản phẩm nổi bật</h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -43,30 +38,28 @@
               <div class="flex">
                 <StarIcon v-for="i in Math.floor(product.rating)" :key="i" class="h-4 w-4 text-yellow-400" />
                 <StarHalfIcon v-if="product.rating % 1 >= 0.5" class="h-4 w-4 text-yellow-400" />
-                <StarIcon v-for="i in (5 - Math.ceil(product.rating))" :key="`empty-${i}`"
+                <StarIcon v-for="i in (5 - Math.ceil(product.rating))" :key="`empty-₫{i}`"
                   class="h-4 w-4 text-gray-300" />
               </div>
               <span class="text-sm text-gray-600 ml-1">{{ product.rating.toFixed(1) }}</span>
             </div>
             <div class="mt-2 flex justify-between items-center">
-              <span class="font-bold text-green-600">${{ product.price.toFixed(2) }}</span>
+              <span class="font-bold text-green-600">₫{{ product.price.toFixed(2) }}</span>
               <button @click.prevent="addToCart(product)" class="btn btn-primary py-1 px-2 text-sm">
-                Add to Cart
+                Thêm vào giỏ
               </button>
             </div>
           </div>
         </router-link>
       </div>
     </section>
-
-    <!-- Benefits Section -->
     <section class="mt-12">
       <h2 class="text-2xl font-bold mb-6">Lý do chọn chúng tôi</h2>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div class="bg-white rounded-lg shadow p-6 text-center">
           <TruckIcon class="h-12 w-12 text-green-600 mx-auto mb-4" />
           <h3 class="text-lg font-medium mb-2">Giao hàng miễn phí</h3>
-          <p class="text-gray-600">Giao hàng miễn phí cho tất cả các đơn hàng trên $50</p>
+          <p class="text-gray-600">Giao hàng miễn phí cho tất cả các đơn hàng trên ₫1.000.000</p>
         </div>
         <div class="bg-white rounded-lg shadow p-6 text-center">
           <LeafIcon class="h-12 w-12 text-green-600 mx-auto mb-4" />
@@ -94,7 +87,6 @@ const images = [
   "https://images.unsplash.com/photo-1540420828642-fca2c5c18abe?w=1200&h=600&fit=crop&q=80",
   "https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=1200&h=600&fit=crop&q=80",
   "https://images.unsplash.com/photo-1513106580091-1d82408b8cd6?w=1200&h=600&fit=crop&q=80",
-  "https://images.unsplash.com/photo-1504672281656-e3e7b0f673ce?w=1200&h=600&fit=crop&q=80",
 ];
 
 onMounted(() => {
@@ -111,10 +103,9 @@ onUnmounted(() => {
 const currentImage = ref(images[0]);
 let intervalId = null;
 
-// Hàm chuyển ảnh
 const changeImage = () => {
   const currentIndex = images.indexOf(currentImage.value);
-  const nextIndex = (currentIndex + 1) % images.length; // Quay vòng lại khi đến ảnh cuối
+  const nextIndex = (currentIndex + 1) % images.length;
   currentImage.value = images[nextIndex];
 };
 const addToCart = (product) => {

@@ -68,7 +68,7 @@
               <div class="text-sm text-gray-900">{{ formatDate(order.orderDate) }}</div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
-              <div class="text-sm font-medium text-gray-900">${{ order.total.toFixed(2) }}</div>
+              <div class="text-sm font-medium text-gray-900">₫{{ order.total.toFixed(2) }}</div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
               <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full" :class="{
@@ -160,9 +160,9 @@
                           <span class="text-sm">{{ item.name }}</span>
                         </div>
                       </td>
-                      <td class="px-3 py-2 whitespace-nowrap text-sm">${{ item.price.toFixed(2) }}</td>
+                      <td class="px-3 py-2 whitespace-nowrap text-sm">₫{{ item.price.toFixed(2) }}</td>
                       <td class="px-3 py-2 whitespace-nowrap text-sm">{{ item.quantity }}</td>
-                      <td class="px-3 py-2 whitespace-nowrap text-sm">${{ (item.price * item.quantity).toFixed(2) }}
+                      <td class="px-3 py-2 whitespace-nowrap text-sm">₫{{ (item.price * item.quantity).toFixed(2) }}
                       </td>
                     </tr>
                   </tbody>
@@ -175,19 +175,19 @@
               <div class="bg-gray-50 p-3 rounded">
                 <div class="flex justify-between mb-1">
                   <span class="text-sm">Subtotal:</span>
-                  <span class="text-sm">${{ selectedOrder.subtotal?.toFixed(2) }}</span>
+                  <span class="text-sm">₫{{ selectedOrder.subtotal?.toFixed(2) }}</span>
                 </div>
                 <div class="flex justify-between mb-1">
                   <span class="text-sm">Shipping:</span>
-                  <span class="text-sm">${{ selectedOrder.shipping?.toFixed(2) }}</span>
+                  <span class="text-sm">₫{{ selectedOrder.shipping?.toFixed(2) }}</span>
                 </div>
                 <div class="flex justify-between mb-1">
                   <span class="text-sm">Tax:</span>
-                  <span class="text-sm">${{ selectedOrder.tax?.toFixed(2) }}</span>
+                  <span class="text-sm">₫{{ selectedOrder.tax?.toFixed(2) }}</span>
                 </div>
                 <div class="flex justify-between font-bold pt-2 border-t mt-2">
                   <span>Total:</span>
-                  <span>${{ selectedOrder.total?.toFixed(2) }}</span>
+                  <span>₫{{ selectedOrder.total?.toFixed(2) }}</span>
                 </div>
               </div>
             </div>
@@ -204,7 +204,6 @@
       </div>
     </div>
 
-    <!-- Update Status Modal -->
     <div v-if="showStatusModal" class="fixed inset-0 z-10 overflow-y-auto">
       <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
         <div class="fixed inset-0 transition-opacity" @click="showStatusModal = false">
@@ -216,10 +215,10 @@
           <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
             <div class="mb-4">
               <h3 class="text-lg font-medium text-gray-900">
-                Update Order Status
+                Update Trạng Thái Hóa Đơn
               </h3>
               <p class="text-sm text-gray-500 mt-1">
-                Order #{{ selectedOrder.id }} for {{ getUserName(selectedOrder.userId) }}
+                Hóa đơn #{{ selectedOrder.id }} for {{ getUserName(selectedOrder.userId) }}
               </p>
             </div>
 
@@ -266,7 +265,6 @@ const filters = ref({
 });
 
 onMounted(() => {
-  // Load orders and users
   orders.value = JSON.parse(localStorage.getItem('orders')) || [];
   users.value = JSON.parse(localStorage.getItem('users')) || [];
 });
@@ -274,7 +272,6 @@ onMounted(() => {
 const filteredOrders = computed(() => {
   let result = [...orders.value];
 
-  // Apply search filter
   if (filters.value.search) {
     const searchTerm = filters.value.search.toLowerCase();
     result = result.filter(order => {
@@ -288,12 +285,10 @@ const filteredOrders = computed(() => {
     });
   }
 
-  // Apply status filter
   if (filters.value.status) {
     result = result.filter(order => order.status === filters.value.status);
   }
 
-  // Apply sorting
   const [sortField, sortDirection] = filters.value.sort.split('-');
   result.sort((a, b) => {
     let comparison = 0;
@@ -312,16 +307,16 @@ const filteredOrders = computed(() => {
 
 const getUserName = (userId) => {
   const user = users.value.find(u => u.id === userId);
-  return user ? user.username : 'Unknown User';
+  return user ? user.username : 'Không có User';
 };
 
 const getUserEmail = (userId) => {
   const user = users.value.find(u => u.id === userId);
-  return user ? user.email : 'Unknown Email';
+  return user ? user.email : 'Không có Email';
 };
 
 const formatDate = (dateString) => {
-  return new Date(dateString).toLocaleDateString('en-US', {
+  return new Date(dateString).toLocaleDateString('vi-VN', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -331,9 +326,9 @@ const formatDate = (dateString) => {
 };
 
 const formatAddress = (shippingInfo) => {
-  if (!shippingInfo) return 'No address provided';
+  if (!shippingInfo) return 'Không có địa chỉ được cung cấp';
 
-  return `${shippingInfo.address}, ${shippingInfo.city}, ${shippingInfo.state} ${shippingInfo.zipCode}, ${shippingInfo.country}`;
+  return `₫{shippingInfo.address}, ₫{shippingInfo.city}, ₫{shippingInfo.state} ₫{shippingInfo.zipCode}, ₫{shippingInfo.country}`;
 };
 
 const openOrderModal = (order) => {
@@ -348,7 +343,6 @@ const openStatusModal = (order) => {
 };
 
 const updateOrderStatus = () => {
-  // Update order status in localStorage
   const allOrders = JSON.parse(localStorage.getItem('orders')) || [];
   const orderIndex = allOrders.findIndex(o => o.id === selectedOrder.value.id);
 
@@ -356,12 +350,10 @@ const updateOrderStatus = () => {
     allOrders[orderIndex].status = newStatus.value;
     localStorage.setItem('orders', JSON.stringify(allOrders));
 
-    // Update local state
     orders.value = allOrders;
     selectedOrder.value.status = newStatus.value;
   }
 
-  // Close modal
   showStatusModal.value = false;
 };
 </script>

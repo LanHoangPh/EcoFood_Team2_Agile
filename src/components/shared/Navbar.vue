@@ -73,6 +73,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { logoutUser } from '../../utils/auth';
 import { ShoppingCartIcon } from 'lucide-vue-next';
+import { UserIcon } from 'lucide-vue-next';
 
 const router = useRouter();
 const user = ref(null);
